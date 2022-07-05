@@ -1,7 +1,6 @@
-import { SourceType } from 'coffee-lex';
+import { SourceType, SourceToken } from 'coffee-lex';
 
-import SourceToken from 'coffee-lex/dist/SourceToken';
-import { Int, Range } from 'decaffeinate-parser/dist/nodes';
+import { Int, Range } from 'decaffeinate-parser';
 import BinaryOpPatcher from './BinaryOpPatcher';
 
 const RANGE_HELPER = `function __range__(left, right, inclusive) {
@@ -79,7 +78,7 @@ export default class RangePatcher extends BinaryOpPatcher {
 
     // `__range__(a, b]` → `__range__(a, b, true)`
     //                ^                   ^^^^^^
-    this.overwrite(this.right.outerEnd, this.contentEnd, `, ${this.isInclusive()})`);
+    this.overwrite(this.right.outerEnd, this.contentEnd, `, ${JSON.stringify(this.isInclusive())})`);
   }
 
   /**

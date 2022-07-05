@@ -1,5 +1,4 @@
-import { SourceType } from 'coffee-lex';
-import SourceToken from 'coffee-lex/dist/SourceToken';
+import { SourceType, SourceToken } from 'coffee-lex';
 import { PatcherContext } from '../../../patchers/types';
 import getAssigneeBindings from '../../../utils/getAssigneeBindings';
 import notNull from '../../../utils/notNull';
@@ -90,9 +89,10 @@ export default abstract class ForPatcher extends LoopPatcher {
   }
 
   patchBodyAndFilter(): void {
+    const filterCode = this.getFilterCode();
     if (this.body) {
-      if (this.filter) {
-        this.body.insertLineBefore(`if (${this.getFilterCode()}) {`, this.getOuterLoopBodyIndent());
+      if (filterCode) {
+        this.body.insertLineBefore(`if (${filterCode}) {`, this.getOuterLoopBodyIndent());
         this.patchBody();
         this.body.insertLineAfter('}', this.getOuterLoopBodyIndent());
         this.body.insertLineAfter('}', this.getLoopIndent());
@@ -101,8 +101,8 @@ export default abstract class ForPatcher extends LoopPatcher {
         this.body.insertLineAfter('}', this.getLoopIndent());
       }
     } else {
-      if (this.filter) {
-        this.insert(this.contentEnd, `if (${this.getFilterCode()}) {} }`);
+      if (filterCode) {
+        this.insert(this.contentEnd, `if (${filterCode}) {} }`);
       } else {
         this.insert(this.contentEnd, `}`);
       }

@@ -1,4 +1,4 @@
-import LinesAndColumns from 'lines-and-columns';
+import { LinesAndColumns } from 'lines-and-columns';
 import printTable, { Column } from './printTable';
 
 export default class PatchError extends Error {
@@ -17,7 +17,7 @@ export default class PatchError extends Error {
    *
    * @see http://stackoverflow.com/a/33837088/549363
    */
-  static detect(error: Error): boolean {
+  static detect(error: Error): error is PatchError {
     return error instanceof Error && 'source' in error && 'start' in error && 'end' in error;
   }
 

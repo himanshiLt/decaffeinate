@@ -22,6 +22,13 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "bin": {
     "decaffeinate": "./bin/decaffeinate"
   },
@@ -30,14 +37,15 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "rimraf dist && mkdirp dist && yarn lint",
-    "build": "script/build",
+    "prebuild": "rimraf dist && mkdirp dist && pnpm lint",
+    "build": "tsup",
     "lint": "eslint --ext .ts src script test",
-    "lint:fix": "yarn lint --fix",
-    "prepublish": "yarn build",
-    "pretest": "yarn build",
-    "test": "jest",
-    "update-website": "ts-node ./script/update-website.ts"
+    "lint:fix": "pnpm lint --fix",
+    "prepublishOnly": "pnpm build",
+    "test": "is-ci test:ci test:watch",
+    "test:ci": "jest --ci --maxWorkers=2",
+    "test:watch": "jest --watch",
+    "update-website": "esr --cache ./script/update-website.ts"
   },
   "husky": {
     "hooks": {
@@ -52,67 +60,74 @@
       "sort-package-json"
     ]
   },
-  "resolutions": {
-    "**/@babel/types": "7.12.6",
-    "**/@resugar/helper-comments": "^1.0.2"
-  },
+  "packageManager": "pnpm@7.3.0",
   "dependencies": {
-    "@codemod/core": "^1.1.0",
-    "@codemod/parser": "^1.1.0",
-    "@resugar/codemod-declarations-block-scope": "^1.0.2",
+    "@babel/types": "^7.12.6",
+    "@codemod/core": "^2.0.1",
+    "@codemod/parser": "^1.2.1",
+    "@resugar/codemod-declarations-block-scope": "^1.0.3",
     "@resugar/codemod-functions-arrow": "^1.0.2",
-    "@resugar/codemod-modules-commonjs": "^1.0.4",
+    "@resugar/codemod-modules-commonjs": "^1.0.5",
     "@resugar/codemod-objects-concise": "^1.0.2",
     "@resugar/codemod-objects-destructuring": "^1.0.1",
     "@resugar/codemod-objects-shorthand": "^1.0.1",
     "@resugar/codemod-strings-template": "^1.0.1",
     "add-variable-declarations": "^4.0.7",
-    "automatic-semicolon-insertion": "^2.0.5",
-    "coffee-lex": "^9.1.5",
-    "decaffeinate-coffeescript": "1.12.7-patch.3",
-    "decaffeinate-coffeescript2": "2.2.1-patch.5",
-    "decaffeinate-parser": "^22.5.15",
+    "automatic-semicolon-insertion": "^3.0.2",
+    "coffee-lex": "^9.3.1",
+    "decaffeinate-coffeescript": "1.12.7-patch.4",
+    "decaffeinate-coffeescript2": "2.2.1-patch.6",
+    "decaffeinate-parser": "^23.0.1",
     "detect-indent": "^4.0.0",
-    "lines-and-columns": "^1.1.6",
-    "magic-string": "^0.25.7",
+    "is-ci-cli": "^2.2.0",
+    "lines-and-columns": "^2.0.3",
+    "magic-string": "^0.26.2",
     "mz": "^2.7.0",
-    "tslib": "^2.1.0"
+    "tslib": "^2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@babel/traverse": "^7.12.5",
-    "@babel/types": "^7.12.6",
+    "@jest/types": "^28.1.1",
     "@types/babel__core": "^7.1.12",
     "@types/babel__generator": "^7.6.2",
     "@types/babel__template": "^7.0.3",
     "@types/babel__traverse": "^7.0.15",
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^26.0.4",
+    "@types/jest": "^28.1.0",
     "@types/mz": "^2.7.0",
-    "@types/node": "^15.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.7.0",
-    "@typescript-eslint/parser": "^4.7.0",
-    "eslint": "^7.13.0",
-    "eslint-config-prettier": "^7.0.0",
-    "eslint-plugin-jest": "^24.1.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "fs-extra": "^9.0.1",
-    "husky": "^6.0.0",
-    "jest": "^26.2.2",
-    "lint-staged": "^10.2.11",
+    "@types/node": "^17.0.39",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "esbuild": "^0.14.42",
+    "esbuild-runner": "^2.2.1",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.4.6",
+    "eslint-plugin-prettier": "^4.0.0",
+    "fs-extra": "^10.1.0",
+    "husky": "^8.0.1",
+    "jest": "^28.1.0",
+    "lint-staged": "^13.0.0",
     "mkdirp": "^1.0.4",
-    "prettier": "^2.0.5",
+    "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
-    "sort-package-json": "^1.44.0",
-    "ts-jest": "^26.1.4",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "sort-package-json": "^1.57.0",
+    "ts-jest": "^28.0.4",
+    "tsup": "^6.1.2",
+    "typescript": "^4.7.3"
   },
   "engines": {
     "node": ">=8"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ]
   }
 }

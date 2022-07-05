@@ -1,4 +1,4 @@
-import lex from 'coffee-lex';
+import { lex } from 'coffee-lex';
 import { nodes as getCoffee1Nodes, tokens as getCoffee1Tokens } from 'decaffeinate-coffeescript';
 import { nodes as getCoffee2Nodes, tokens as getCoffee2Tokens } from 'decaffeinate-coffeescript2';
 import { parse as decaffeinateParse } from 'decaffeinate-parser';
@@ -23,6 +23,7 @@ import resolveToPatchError from './utils/resolveToPatchError';
 export { default as run } from './cli';
 import { resolveOptions, Options } from './options';
 import notNull from './utils/notNull';
+import assert from 'assert';
 export { PatchError };
 
 export interface ConversionResult {
@@ -107,7 +108,8 @@ function runStages(initialContent: string, options: Options, stages: Array<Stage
 function runStage(stage: Stage, content: string, options: Options): StageResult {
   try {
     return stage.run(content, options);
-  } catch (err) {
+  } catch (err: unknown) {
+    assert(err instanceof Error);
     const patchError = resolveToPatchError(err, content, stage.name);
     if (patchError !== null) {
       throw patchError;

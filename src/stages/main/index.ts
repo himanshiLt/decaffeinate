@@ -1,4 +1,4 @@
-import { CompoundAssignOp, Node } from 'decaffeinate-parser/dist/nodes';
+import { CompoundAssignOp, Node } from 'decaffeinate-parser';
 import { PatcherClass } from '../../patchers/NodePatcher';
 import TransformCoffeeScriptStage from '../TransformCoffeeScriptStage';
 import PassthroughPatcher from './../../patchers/PassthroughPatcher';
@@ -60,6 +60,8 @@ import ModuleSpecifierPatcher from './patchers/ModuleSpecifierPatcher';
 import ModuloOpCompoundAssignOpPatcher from './patchers/ModuloOpCompoundAssignOpPatcher';
 import ModuloOpPatcher from './patchers/ModuloOpPatcher';
 import NewOpPatcher from './patchers/NewOpPatcher';
+import NullishCoalescingCompoundAssignOpPatcher from './patchers/NullishCoalescingCompoundAssignOpPatcher';
+import NullishCoalescingExistsOpPatcher from './patchers/NullishCoalescingExistsOpPatcher';
 import ObjectInitialiserMemberPatcher from './patchers/ObjectInitialiserMemberPatcher';
 import ObjectInitialiserPatcher from './patchers/ObjectInitialiserPatcher';
 import OfOpPatcher from './patchers/OfOpPatcher';
@@ -223,10 +225,18 @@ export default class MainStage extends TransformCoffeeScriptStage {
         switch ((node as CompoundAssignOp).op) {
           case 'LogicalAndOp':
           case 'LogicalOrOp':
-            return LogicalOpCompoundAssignOpPatcher;
+            if (this.options.logicalAssignment) {
+              return CompoundAssignOpPatcher;
+            } else {
+              return LogicalOpCompoundAssignOpPatcher;
+            }
 
           case 'ExistsOp':
-            return ExistsOpCompoundAssignOpPatcher;
+            if (this.options.logicalAssignment) {
+              return NullishCoalescingCompoundAssignOpPatcher;
+            } else {
+              return ExistsOpCompoundAssignOpPatcher;
+            }
 
           case 'ModuloOp':
             return ModuloOpCompoundAssignOpPatcher;
@@ -264,7 +274,11 @@ export default class MainStage extends TransformCoffeeScriptStage {
         return HeregexPatcher;
 
       case 'ExistsOp':
-        return ExistsOpPatcher;
+        if (this.options.nullishCoalescing) {
+          return NullishCoalescingExistsOpPatcher;
+        } else {
+          return ExistsOpPatcher;
+        }
 
       case 'LogicalAndOp':
       case 'LogicalOrOp':

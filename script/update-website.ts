@@ -3,6 +3,7 @@ import { readFile } from 'mz/fs';
 import { join } from 'path';
 import getLatestVersion from './getLatestVersion';
 import type Package from '../package.json';
+import assert from 'assert';
 
 let commit = true;
 
@@ -21,12 +22,11 @@ for (let i = 2; i < process.argv.length; i++) {
 
 async function pkg(): Promise<typeof Package> {
   const content = await readFile(join(__dirname, '../package.json'), { encoding: 'utf8' });
-  return JSON.parse(content);
+  return JSON.parse(content) as typeof Package;
 }
 
 async function configureGithubRemote(name: string, project: string): Promise<void> {
-  const githubToken = process.env['GH_TOKEN'] || process.env['GITHUB_TOKEN'];
-  const url = githubToken ? `https://${githubToken}@github.com/${project}.git` : `git@github.com:${project}.git`;
+  const url = `git@github.com:${project}.git`;
 
   try {
     await run('git', ['remote', 'remove', 'website']);
@@ -72,29 +72,29 @@ async function updateWebsite(): Promise<void> {
   const decaffeinateRegistry = decaffeinatePackage['publishConfig']['registry'];
 
   console.log('Setting up website repo…');
-  await run('git', ['fetch', '-f', 'website', 'master:website-master']);
-  await run('git', ['reset', '--hard', 'website-master']);
+  await run('git', ['fetch', '-f', 'website', 'main:website-main']);
+  await run('git', ['reset', '--hard', 'website-main']);
 
   const websitePackage = await pkg();
-  const currentVersion = websitePackage['devDependencies']['decaffeinate'];
+  const currentVersion = websitePackage['devDependencies']['decaffeinate'] as string;
 
   if (currentVersion === latestVersion) {
     console.log(`Already using decaffeinate v${latestVersion}, skipping install.`);
   } else {
     console.log(`${currentVersion} != ${latestVersion}, installing decaffeinate v${latestVersion}…`);
-    const args = ['add', '--dev', '--exact', `decaffeinate@${latestVersion}`];
+    const args = ['install', '--save-dev', '--save-exact', `decaffeinate@${latestVersion}`];
 
     if (decaffeinateRegistry) {
       args.unshift('--registry', decaffeinateRegistry);
     }
 
-    await run('yarn', args);
+    await run('pnpm', args);
 
     if (await hasChanges()) {
       if (commit) {
         console.log('Pushing changes to website repo…');
         await run('git', ['commit', '-av', '-m', `chore: update to decaffeinate ${latestVersion}`]);
-        await run('git', ['push', 'website', 'HEAD:master']);
+        await run('git', ['push', 'website', 'HEAD:main']);
       } else {
         console.log('Not committing because --no-commit was given:');
         console.log((await run('git', ['diff'])).stdout);
@@ -107,6 +107,7 @@ async function updateWebsite(): Promise<void> {
 }
 
 updateWebsite().catch((err) => {
+  assert(err instanceof Error);
   console.error(err.stack);
   process.exit(1);
 });

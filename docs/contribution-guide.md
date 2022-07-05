@@ -7,16 +7,24 @@ come in, and this document will explain how to help.
 
 ## Get the code, get it running
 
+Enable [`corepack`](https://nodejs.org/api/corepack.html), or otherwise install `pnpm` globally:
+
+```bash
+$ corepack enable
 ```
+
+Get the code and install the dependencies.
+
+```bash
 $ git clone https://github.com/decaffeinate/decaffeinate.git
 $ cd decaffeinate
-$ npm install
+$ pnpm install
 ```
 
 Run the tests to make sure everything works as expected:
 
-```
-$ npm test
+```bash
+$ pnpm test
 ```
 
 ## How is decaffeinate structured?
@@ -38,7 +46,7 @@ For example, to log all the edits made by the `BlockPatcher` you can set
 `DEBUG:BlockPatcher` to `1`, like so:
 
 ```
-$ env 'DEBUG:BlockPatcher=1' npm test
+$ env 'DEBUG:BlockPatcher=1' pnpm test
 ```
 
 To enable all loggers, use `DEBUG:*=1`. To log within a patcher, use the `log`
@@ -188,7 +196,7 @@ export default class BoolPatcher extends NodePatcher {
 Now we've got a patcher that rewrites boolean aliases to `true` and `false`! You
 can [the real `BoolPatcher` here][BoolPatcher].
 
-[BoolPatcher]: https://github.com/decaffeinate/decaffeinate/blob/master/src/stages/main/patchers/BoolPatcher.js
+[BoolPatcher]: https://github.com/decaffeinate/decaffeinate/blob/main/src/stages/main/patchers/BoolPatcher.js
 
 In
 addition to `overwrite`, there's `insert` and `remove` which patchers can use to
@@ -338,7 +346,7 @@ the `right` patcher knows to patch using `patchAsExpression` instead of
 `patchAsStatement`. In reality, `PlusOp` and several other binary operators are
 all handled by [`BinaryOpPatcher`][BinaryOpPatcher].
 
-[BinaryOpPatcher]: https://github.com/decaffeinate/decaffeinate/blob/master/src/stages/main/patchers/BinaryOpPatcher.js
+[BinaryOpPatcher]: https://github.com/decaffeinate/decaffeinate/blob/main/src/stages/main/patchers/BinaryOpPatcher.js
 
 Finally, we can omit `patchAsStatement` in this case because all it does is
 delegate to `patchAsExpression`, which is the default behavior.
@@ -395,7 +403,7 @@ actually edits `a().b ||= c` to become:
 (base = a()).b = base.b || c
 ```
 
-[locaop]: https://github.com/decaffeinate/decaffeinate/blob/master/src/stages/main/patchers/LogicalOpCompoundAssignOpPatcher.js
+[locaop]: https://github.com/decaffeinate/decaffeinate/blob/main/src/stages/main/patchers/LogicalOpCompoundAssignOpPatcher.js
 
 How does this work? This is accomplished by the `patchRepeatable` method on
 patchers. It is responsible for editing its node to store the side-effecty parts
@@ -407,7 +415,7 @@ to repeat the source as-is. The `patchAsRepeatableExpression` method can be
 overridden to provide a custom behavior for making the expression repeatable.
 See [`MemberAccessOpPatcher`][maop] for an example.
 
-[maop]: https://github.com/decaffeinate/decaffeinate/blob/master/src/stages/main/patchers/MemberAccessOpPatcher.js
+[maop]: https://github.com/decaffeinate/decaffeinate/blob/main/src/stages/main/patchers/MemberAccessOpPatcher.js
 
 Temporary variables may also be introduced as loop counters or similar. To claim
 a temporary variable, just use the patchers' `claimFreeBinding` method,
@@ -435,10 +443,10 @@ appropriate in a post-processing step.
 If you have found a bug or have a feature you'd like to add, it is probably
 worth creating an issue to document the bug or discuss the feature before doing
 significant work. Once you've decided on an approach, get the code and check
-that the tests all pass as shown above, create a branch based on `master` with
+that the tests all pass as shown above, create a branch based on `main` with
 a descriptive name such as `fix-binary-operator-statements` or `add-support-for-soaked-member-access`.
 Make changes to fix your bug or add your feature, ensuring that you write tests
-covering the changes. The tests you add or change *should fail* on `master`.
+covering the changes. The tests you add or change *should fail* on `main`.
 
 ### Commit messages
 
@@ -454,7 +462,11 @@ We use [semantic-release](https://github.com/semantic-release/semantic-release) 
 * use lowercase on the first line of the commit message without a period
 * if backward-incompatible changes are in a commit, add `BREAKING CHANGE:` to the footer of the commit with a description
 
-Why do we use this commit message style? To automate releases. Whenever a build passes on `master`, semantic-release will look at the commits since the last release and adjust the version appropriately. Commits with `fix:` bump the patch version, `feat:` bumps the minor version, and `BREAKING CHANGE:` bumps the major version (only one of the three will be bumped per release).
+Why do we use this commit message style? To automate releases. Whenever a build
+passes on `main`, semantic-release will look at the commits since the last
+release and adjust the version appropriately. Commits with `fix:` bump the patch
+version, `feat:` bumps the minor version, and `BREAKING CHANGE:` bumps the major
+version (only one of the three will be bumped per release).
 
 Once you're satisfied with your changes, create a pull request on your own fork.
 Please provide a description of *why* you're issuing the pull request, and

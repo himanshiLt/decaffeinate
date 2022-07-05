@@ -180,6 +180,45 @@ describe('classes', () => {
       );
     });
 
+    it('subclass constructor with function body', () => {
+      checkCS1(
+        `
+        class A extends B
+          constructor: (@a) ->
+            super()
+      `,
+        `
+        class A extends B {
+          constructor(a) {
+            this.a = a;
+            super();
+          }
+        }
+      `
+      );
+
+      checkCS2(
+        `
+        class A extends B
+          constructor: (@a) ->
+            super()
+      `,
+        `
+        class A extends B {
+          constructor(a) {
+            super();
+            this.a = a;
+          }
+        }
+      `,
+        {
+          options: {
+            disallowInvalidConstructors: true,
+          },
+        }
+      );
+    });
+
     it('method', () => {
       check(
         `
@@ -294,6 +333,39 @@ describe('classes', () => {
         'Cannot automatically convert a subclass that uses bound methods.',
         {
           disallowInvalidConstructors: true,
+          useCS2: false,
+        }
+      );
+    });
+
+    it('passes existing constructor with bound methods in a subclass in CS2', () => {
+      checkCS2(
+        `
+      class A extends B
+        a: =>
+          1
+
+        constructor: ->
+          super()
+          this.b = 2;
+    `,
+        `
+      class A extends B {
+        a() {
+          return 1;
+        }
+
+        constructor() {
+          super();
+          this.a = this.a.bind(this);
+          this.b = 2;
+        }
+      }
+    `,
+        {
+          options: {
+            disallowInvalidConstructors: true,
+          },
         }
       );
     });
@@ -382,7 +454,7 @@ describe('classes', () => {
     });
 
     it('adds to an existing constructor for bound methods before a `super` call when requested', () => {
-      check(
+      checkCS1(
         `
       class A extends B
         a: =>
@@ -401,6 +473,31 @@ describe('classes', () => {
         constructor() {
           this.a = this.a.bind(this);
           super();
+          this.b = 2;
+        }
+      }
+    `
+      );
+
+      checkCS2(
+        `
+      class A extends B
+        a: =>
+          1
+
+        constructor: ->
+          super()
+          this.b = 2;
+    `,
+        `
+      class A extends B {
+        a() {
+          return 1;
+        }
+
+        constructor() {
+          super();
+          this.a = this.a.bind(this);
           this.b = 2;
         }
       }

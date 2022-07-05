@@ -1,4 +1,4 @@
-import { Class, This } from 'decaffeinate-parser/dist/nodes';
+import { Class, This } from 'decaffeinate-parser';
 import NodePatcher from '../../../patchers/NodePatcher';
 import { PatcherContext, PatchOptions } from '../../../patchers/types';
 import { FIX_INVALID_CONSTRUCTOR } from '../../../suggestions';
@@ -29,7 +29,8 @@ export default class ConstructorPatcher extends ObjectBodyMemberPatcher {
 
     if (this.expression.body) {
       const linesToInsert = this.getLinesToInsert();
-      this.expression.body.insertStatementsAtIndex(linesToInsert, 0);
+      const insertIndex = this.options.useCS2 ? this.getIndexOfSuperStatement() + 1 : 0;
+      this.expression.body.insertStatementsAtIndex(linesToInsert, insertIndex);
       super.patch(options);
     } else {
       super.patch(options);
@@ -83,7 +84,7 @@ export default class ConstructorPatcher extends ObjectBodyMemberPatcher {
 
     // Any bindings would ideally go before the super call, so if there are any,
     // we'll need this before super.
-    if (this.getBindings().length > 0) {
+    if (this.getBindings().length > 0 && !this.options.useCS2) {
       return 'Cannot automatically convert a subclass that uses bound methods.';
     }
 

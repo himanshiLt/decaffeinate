@@ -1,6 +1,5 @@
-import { SourceType } from 'coffee-lex';
-import SourceToken from 'coffee-lex/dist/SourceToken';
-import { Node } from 'decaffeinate-parser/dist/nodes';
+import { SourceType, SourceToken } from 'coffee-lex';
+import { Node } from 'decaffeinate-parser';
 import { PatcherContext, PatchOptions } from '../../../patchers/types';
 import { isForbiddenJsName } from '../../../utils/isReservedWord';
 import notNull from '../../../utils/notNull';
@@ -77,7 +76,7 @@ export default class ClassPatcher extends NodePatcher {
       if (name) {
         // `A.B` → `A.B = class B`
         //             ^^^^^^^^^^
-        this.insert(this.nameAssignee.outerEnd, ` = class ${this.getName()}`);
+        this.insert(this.nameAssignee.outerEnd, ` = class ${name}`);
       } else {
         // `A[0]` → `A[0] = class`
         //               ^^^^^^^^

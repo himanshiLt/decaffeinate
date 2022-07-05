@@ -1,8 +1,6 @@
-import { SourceType } from 'coffee-lex';
-import SourceToken from 'coffee-lex/dist/SourceToken';
-import SourceTokenList from 'coffee-lex/dist/SourceTokenList';
-import SourceTokenListIndex from 'coffee-lex/dist/SourceTokenListIndex';
-import { FunctionApplication, NewOp, Node, SoakedFunctionApplication } from 'decaffeinate-parser/dist/nodes';
+import assert from 'assert';
+import { SourceType, SourceToken, SourceTokenList, SourceTokenListIndex } from 'coffee-lex';
+import { FunctionApplication, NewOp, Node, SoakedFunctionApplication } from 'decaffeinate-parser';
 import MagicString from 'magic-string';
 import { Options } from '../options';
 import { AVOID_IIFES, AVOID_INLINE_ASSIGNMENTS, CLEAN_UP_IMPLICIT_RETURNS, Suggestion } from '../suggestions';
@@ -347,7 +345,8 @@ export default class NodePatcher {
   withPrettyErrors(body: () => void): void {
     try {
       body();
-    } catch (err) {
+    } catch (err: unknown) {
+      assert(err instanceof Error);
       if (!PatcherError.detect(err)) {
         throw this.error(err.message, this.contentStart, this.contentEnd, err);
       } else {
@@ -432,7 +431,7 @@ export default class NodePatcher {
    */
   insert(index: number, content: string): void {
     if (typeof index !== 'number') {
-      throw new Error(`cannot insert ${JSON.stringify(content)} at non-numeric index ${index}`);
+      throw new Error(`cannot insert ${JSON.stringify(content)} at non-numeric index ${index as number}`);
     }
     this.log(
       'INSERT',
@@ -457,7 +456,7 @@ export default class NodePatcher {
    */
   prependLeft(index: number, content: string): void {
     if (typeof index !== 'number') {
-      throw new Error(`cannot insert ${JSON.stringify(content)} at non-numeric index ${index}`);
+      throw new Error(`cannot insert ${JSON.stringify(content)} at non-numeric index ${index as number}`);
     }
     this.log(
       'PREPEND LEFT',
@@ -589,7 +588,7 @@ export default class NodePatcher {
       throw this.error(`cannot remove non-numeric range [${start}, ${end})`);
     }
     if (typeof index !== 'number') {
-      throw this.error(`cannot move to non-numeric index: ${index}`);
+      throw this.error(`cannot move to non-numeric index: ${index as number}`);
     }
     this.log(
       'MOVE',
