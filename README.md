@@ -33,7 +33,7 @@ information and advice on running decaffeinate on real-world code, and see
 [Cleanup suggestions after running decaffeinate][suggestions] for advice on
 cleaning up the converted JavaScript code and other things to keep in mind.
 
-## Questions and support
+## Questions and support.
 
 Feel free to join the [gitter chat room](https://gitter.im/decaffeinate/Lobby)
 to ask questions, or you can file an issue on the [issues] page:
